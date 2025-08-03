@@ -42,16 +42,8 @@ class WeatherProvider extends ChangeNotifier {
 
       _currentWeather = weather;
 
-      // Save to Firebase if user is logged in
-      try {
-        final user = _firebaseService.getCurrentUser();
-        if (user != null) {
-          await _firebaseService.saveWeatherHistory(user.uid, weather);
-        }
-      } catch (e) {
-        // Firebase not available, continue without saving
-        print('Firebase not available for weather history: $e');
-      }
+      // Save to Firebase if user is logged in (non-blocking)
+      _saveWeatherToFirebase(weather);
     } catch (e) {
       setError(e.toString());
     } finally {
@@ -67,7 +59,18 @@ class WeatherProvider extends ChangeNotifier {
       final weather = await _weatherService.getWeatherByCity(cityName);
       _currentWeather = weather;
 
-      // Save to Firebase if user is logged in
+      // Save to Firebase if user is logged in (non-blocking)
+      _saveWeatherToFirebase(weather);
+    } catch (e) {
+      setError(e.toString());
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Non-blocking Firebase save operation
+  void _saveWeatherToFirebase(WeatherModel weather) {
+    Future.microtask(() async {
       try {
         final user = _firebaseService.getCurrentUser();
         if (user != null) {
@@ -75,13 +78,9 @@ class WeatherProvider extends ChangeNotifier {
         }
       } catch (e) {
         // Firebase not available, continue without saving
-        print('Firebase not available for weather history: $e');
+        debugPrint('Firebase not available for weather history: $e');
       }
-    } catch (e) {
-      setError(e.toString());
-    } finally {
-      setLoading(false);
-    }
+    });
   }
 
   Future<void> addFavoriteCity(String cityName) async {
@@ -142,7 +141,7 @@ class WeatherProvider extends ChangeNotifier {
       }
     } catch (e) {
       // Firebase not available, continue with empty list
-      print('Firebase not available for loading favorites: $e');
+      debugPrint('Firebase not available for loading favorites: $e');
     }
   }
 }

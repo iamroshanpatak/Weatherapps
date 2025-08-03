@@ -16,23 +16,33 @@ class WeatherService {
     );
 
     try {
-      print('Fetching weather for coordinates: $latitude, $longitude');
-      final response = await http.get(url);
+      // Fetching weather for coordinates: $latitude, $longitude
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Request timed out. Please check your internet connection.');
+        },
+      );
 
-      print('Weather API response status: ${response.statusCode}');
+      // Weather API response status: ${response.statusCode}
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        print(
-          'Weather data received: ${jsonData['name']} - ${jsonData['main']['temp']}°C',
-        );
+        // Weather data received: ${jsonData['name']} - ${jsonData['main']['temp']}°C
         return WeatherModel.fromJson(jsonData);
+      } else if (response.statusCode == 401) {
+        throw Exception('Invalid API key. Please check your configuration.');
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again later.');
       } else {
-        print('Weather API error: ${response.statusCode} - ${response.body}');
+        // Weather API error: ${response.statusCode} - ${response.body}
         throw Exception('Failed to load weather data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Weather service error: $e');
+      // Weather service error: $e
+      if (e.toString().contains('timeout')) {
+        throw Exception('Request timed out. Please check your internet connection.');
+      }
       throw Exception('Error fetching weather data: $e');
     }
   }
@@ -43,23 +53,35 @@ class WeatherService {
     );
 
     try {
-      print('Fetching weather for city: $cityName');
-      final response = await http.get(url);
+      // Fetching weather for city: $cityName
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Request timed out. Please check your internet connection.');
+        },
+      );
 
-      print('Weather API response status: ${response.statusCode}');
+      // Weather API response status: ${response.statusCode}
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        print(
-          'Weather data received: ${jsonData['name']} - ${jsonData['main']['temp']}°C',
-        );
+        // Weather data received: ${jsonData['name']} - ${jsonData['main']['temp']}°C
         return WeatherModel.fromJson(jsonData);
+      } else if (response.statusCode == 401) {
+        throw Exception('Invalid API key. Please check your configuration.');
+      } else if (response.statusCode == 404) {
+        throw Exception('City not found. Please check the spelling.');
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again later.');
       } else {
-        print('Weather API error: ${response.statusCode} - ${response.body}');
+        // Weather API error: ${response.statusCode} - ${response.body}
         throw Exception('Failed to load weather data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Weather service error: $e');
+      // Weather service error: $e
+      if (e.toString().contains('timeout')) {
+        throw Exception('Request timed out. Please check your internet connection.');
+      }
       throw Exception('Error fetching weather data: $e');
     }
   }

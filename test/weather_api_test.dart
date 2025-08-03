@@ -15,11 +15,9 @@ void main() {
         expect(weather.description, isA<String>());
         expect(weather.icon, isA<String>());
 
-        print(
-          '✅ Weather API test passed: ${weather.cityName} - ${weather.temperature}°C',
-        );
+        // ✅ Weather API test passed: ${weather.cityName} - ${weather.temperature}°C
       } catch (e) {
-        print('❌ Weather API test failed: $e');
+        // ❌ Weather API test failed: $e
         // Don't fail the test if API is not available
         expect(true, true);
       }
@@ -40,11 +38,9 @@ void main() {
         expect(weather.description, isA<String>());
         expect(weather.icon, isA<String>());
 
-        print(
-          '✅ Weather API coordinates test passed: ${weather.cityName} - ${weather.temperature}°C',
-        );
+        // ✅ Weather API coordinates test passed: ${weather.cityName} - ${weather.temperature}°C
       } catch (e) {
-        print('❌ Weather API coordinates test failed: $e');
+        // ❌ Weather API coordinates test failed: $e
         // Don't fail the test if API is not available
         expect(true, true);
       }

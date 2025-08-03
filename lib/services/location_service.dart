@@ -3,24 +3,43 @@ import 'package:geocoding/geocoding.dart';
 
 class LocationService {
   Future<Position> getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception('Location permissions are denied');
+    try {
+      // Check if location services are enabled with timeout
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled()
+          .timeout(const Duration(seconds: 5));
+      
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled.');
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permissions are permanently denied');
-    }
+      // Check and request permissions with timeout
+      LocationPermission permission = await Geolocator.checkPermission()
+          .timeout(const Duration(seconds: 5));
+      
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission()
+            .timeout(const Duration(seconds: 10));
+        
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied');
+        }
+      }
 
-    return await Geolocator.getCurrentPosition();
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied');
+      }
+
+      // Get current position with timeout
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 15),
+      );
+    } catch (e) {
+      if (e.toString().contains('timeout')) {
+        throw Exception('Location request timed out. Please try again.');
+      }
+      throw Exception('Failed to get location: $e');
+    }
   }
 
   Future<String> getCityName(double latitude, double longitude) async {
@@ -28,7 +47,8 @@ class LocationService {
       List<Placemark> placemarks = await placemarkFromCoordinates(
         latitude,
         longitude,
-      );
+      ).timeout(const Duration(seconds: 10));
+      
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         return place.locality ?? place.subAdministrativeArea ?? 'Unknown City';
@@ -41,7 +61,9 @@ class LocationService {
 
   Future<Map<String, double>> getCoordinatesFromCity(String cityName) async {
     try {
-      List<Location> locations = await locationFromAddress(cityName);
+      List<Location> locations = await locationFromAddress(cityName)
+          .timeout(const Duration(seconds: 10));
+      
       if (locations.isNotEmpty) {
         return {
           'latitude': locations.first.latitude,

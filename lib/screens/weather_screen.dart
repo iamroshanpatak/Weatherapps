@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/weather_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
-import '../services/weather_service.dart';
+import '../models/weather_model.dart';
+import '../widgets/error_widget.dart';
 
 class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
@@ -15,19 +15,51 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   final _searchController = TextEditingController();
-  final WeatherService _weatherService = WeatherService();
+  bool _isInitialized = false;
+  bool _isSearchBarVisible = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    // Delay initialization to prevent blocking UI
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WeatherProvider>().getCurrentLocationWeather();
+      _initializeWeather();
     });
+
+    // Add scroll listener for search bar visibility
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 50 && _isSearchBarVisible) {
+        setState(() {
+          _isSearchBarVisible = false;
+        });
+      } else if (_scrollController.offset <= 50 && !_isSearchBarVisible) {
+        setState(() {
+          _isSearchBarVisible = true;
+        });
+      }
+    });
+  }
+
+  Future<void> _initializeWeather() async {
+    if (!_isInitialized) {
+      setState(() {
+        _isInitialized = true;
+      });
+      
+      // Add a small delay to ensure UI is ready
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      if (mounted) {
+        context.read<WeatherProvider>().getCurrentLocationWeather();
+      }
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -40,60 +72,69 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.themeMode == ThemeMode.dark;
+    
+    // Define gradient colors based on theme
+    final List<Color> gradientColors = isDark 
+      ? [
+          const Color(0xFF0F2027), // Dark blue
+          const Color(0xFF203A43), // Medium blue
+          const Color(0xFF2C5364), // Light blue
+          const Color(0xFF4A90E2), // Bright blue
+        ]
+      : [
+          const Color(0xFFFF6B6B), // Bright red
+          const Color(0xFFFF8E53), // Orange
+          const Color(0xFFFFA726), // Light orange
+          const Color(0xFFFFCC02), // Yellow
+        ];
+    
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
+      body: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-           colors: [
-              Color.fromARGB(255, 87, 115, 167),
-              Color.fromARGB(255, 141, 171, 223),
-            ],
+            colors: gradientColors,
+            stops: const [0.0, 0.3, 0.7, 1.0],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
               _buildAppBar(),
-              _buildSearchBar(),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _isSearchBarVisible ? 80 : 0,
+                child: _isSearchBarVisible ? _buildSearchBar() : const SizedBox.shrink(),
+              ),
               Expanded(
                 child: Consumer<WeatherProvider>(
                   builder: (context, weatherProvider, child) {
-                    if (weatherProvider.isLoading) {
+                    if (!_isInitialized || weatherProvider.isLoading) {
                       return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(color: Colors.white),
+                            SizedBox(height: 16),
+                            Text(
+                              'Loading weather data...',
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                          ],
+                        ),
                       );
                     }
 
                     if (weatherProvider.error != null) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 64,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              weatherProvider.error!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                weatherProvider.getCurrentLocationWeather();
-                              },
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
+                      return CustomErrorWidget(
+                        message: weatherProvider.error!,
+                        onRetry: () {
+                          weatherProvider.getCurrentLocationWeather();
+                        },
                       );
                     }
 
@@ -134,24 +175,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
-              return Row(
-                children: [
-                  Icon(
-                    themeProvider.themeMode == ThemeMode.dark
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
-                    color: Colors.white,
-                  ),
-                  Switch(
-                    value: themeProvider.themeMode == ThemeMode.dark,
-                    onChanged: (value) {
-                      themeProvider.toggleTheme(value);
-                    },
-                    activeColor: Colors.white,
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: Colors.grey,
-                  ),
-                ],
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Switch(
+                      value: themeProvider.themeMode == ThemeMode.dark,
+                      onChanged: (value) {
+                        themeProvider.toggleTheme(value);
+                        // Force rebuild to ensure background changes
+                        setState(() {});
+                      },
+                      activeColor: Colors.white,
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: Colors.grey.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -160,10 +214,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
               return PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 onSelected: (value) {
-                  if (value == 'logout') {
-                    authProvider.signOut();
-                    Navigator.of(context).pushReplacementNamed('/login');
-                  }
+                                      if (value == 'logout') {
+                      authProvider.signOut();
+                      Navigator.of(context).pushReplacementNamed('/login');
+                    }
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
@@ -191,47 +245,81 @@ class _WeatherScreenState extends State<WeatherScreen> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search city...',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                ),
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Colors.white),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.5),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Colors.white),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  width: 1.5,
                 ),
               ),
-              onSubmitted: (_) => _searchCity(),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search city...',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search, 
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                  ),
+                  onSubmitted: (_) => _searchCity(),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: () {
-              context.read<WeatherProvider>().getCurrentLocationWeather();
-            },
-            icon: const Icon(Icons.my_location, color: Colors.white),
+          const SizedBox(width: 12),
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.4),
+                width: 1.5,
+              ),
+            ),
+            child: IconButton(
+              onPressed: () {
+                context.read<WeatherProvider>().getCurrentLocationWeather();
+              },
+              icon: const Icon(
+                Icons.my_location, 
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildWeatherContent(weather, WeatherProvider weatherProvider) {
+  Widget _buildWeatherContent(WeatherModel weather, WeatherProvider weatherProvider) {
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
@@ -245,7 +333,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildCurrentWeather(weather) {
+  Widget _buildCurrentWeather(WeatherModel weather) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -284,7 +372,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildWeatherDetails(weather) {
+  Widget _buildWeatherDetails(WeatherModel weather) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'dart:math' as math;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -33,7 +32,6 @@ class _SignupScreenState extends State<SignupScreen>
   late Animation<double> _cloudAnimation;
   late Animation<double> _rainAnimation;
   late Animation<double> _rainTranslationAnimation;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -90,13 +88,7 @@ class _SignupScreenState extends State<SignupScreen>
       curve: Curves.easeInOut,
     ));
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+
 
     // Start animations
     _sunController.repeat();
@@ -220,7 +212,7 @@ class _SignupScreenState extends State<SignupScreen>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.yellow.withOpacity(0.3),
+                            color: Colors.yellow.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -250,7 +242,7 @@ class _SignupScreenState extends State<SignupScreen>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             blurRadius: 15,
                             spreadRadius: 2,
                           ),
@@ -282,7 +274,7 @@ class _SignupScreenState extends State<SignupScreen>
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.3),
+                              color: Colors.blue.withValues(alpha: 0.3),
                               blurRadius: 10,
                               spreadRadius: 1,
                             ),
@@ -314,7 +306,7 @@ class _SignupScreenState extends State<SignupScreen>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -335,7 +327,7 @@ class _SignupScreenState extends State<SignupScreen>
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.yellow.withOpacity(0.4),
+                                          color: Colors.yellow.withValues(alpha: 0.4),
                                           blurRadius: 30,
                                           spreadRadius: 10,
                                         ),
@@ -376,15 +368,15 @@ class _SignupScreenState extends State<SignupScreen>
                           return Container(
                             padding: const EdgeInsets.all(30),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(25),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -397,10 +389,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+                                    border: Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withOpacity(0.3),
+                                        color: Colors.blue.withValues(alpha: 0.3),
                                         blurRadius: 15,
                                         offset: const Offset(0, 5),
                                         spreadRadius: 2,
@@ -438,10 +430,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+                                    border: Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withOpacity(0.3),
+                                        color: Colors.blue.withValues(alpha: 0.3),
                                         blurRadius: 15,
                                         offset: const Offset(0, 5),
                                         spreadRadius: 2,
@@ -479,10 +471,10 @@ class _SignupScreenState extends State<SignupScreen>
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+                                    border: Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withOpacity(0.3),
+                                        color: Colors.blue.withValues(alpha: 0.3),
                                         blurRadius: 15,
                                         offset: const Offset(0, 5),
                                         spreadRadius: 2,
@@ -531,7 +523,7 @@ class _SignupScreenState extends State<SignupScreen>
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.green.withOpacity(0.3),
+                                          color: Colors.green.withValues(alpha: 0.3),
                                           blurRadius: 15,
                                           offset: const Offset(0, 5),
                                         ),
@@ -562,10 +554,10 @@ class _SignupScreenState extends State<SignupScreen>
                                     margin: const EdgeInsets.only(top: 20),
                                     padding: const EdgeInsets.all(15),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
+                                      color: Colors.red.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: Colors.red.withOpacity(0.3),
+                                        color: Colors.red.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Text(

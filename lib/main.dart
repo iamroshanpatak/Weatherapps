@@ -13,16 +13,26 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase with timeout and error handling
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    ).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        // Continue without Firebase if timeout occurs
+        debugPrint('Firebase initialization timed out, continuing without Firebase');
+        return Firebase.app();
+      },
     );
-    print('Firebase initialized successfully');
+    debugPrint('Firebase initialized successfully');
   } catch (e) {
-    // For development, continue without Firebase if configuration is missing
-    print('Firebase initialization failed: $e');
-    print('Continuing without Firebase for development...');
+    // Continue without Firebase if initialization fails
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('Continuing without Firebase for development...');
   }
+  
   runApp(const MyApp());
 }
 
@@ -40,7 +50,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return Consumer<AuthProvider>(
-            builder: (context, authProvider, __) {
+            builder: (context, authProvider, _) {
               return MaterialApp(
                 title: 'Weather App',
                 theme: themeProvider.lightTheme,
@@ -78,15 +88,15 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     zoom: 12,
   );
 
-  late GoogleMapController _mapController;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Google Map')),
       body: GoogleMap(
         initialCameraPosition: _initialPosition,
-        onMapCreated: (controller) => _mapController = controller,
+        onMapCreated: (controller) {
+          // Map controller created
+        },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'dart:math' as math;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _cloudAnimation;
   late Animation<double> _rainAnimation;
   late Animation<double> _rainTranslationAnimation;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -87,14 +85,6 @@ class _LoginScreenState extends State<LoginScreen>
       curve: Curves.easeInOut,
     ));
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-
     // Start animations
     _sunController.repeat();
     _cloudController.repeat();
@@ -136,7 +126,6 @@ class _LoginScreenState extends State<LoginScreen>
     // Check if email is empty
     if (email.isEmpty) {
       setState(() {
-        // Show error through auth provider
         Provider.of<AuthProvider>(context, listen: false).setError('Email is required');
       });
       return;
@@ -210,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.yellow.withOpacity(0.3),
+                            color: Colors.yellow.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -240,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             blurRadius: 15,
                             spreadRadius: 2,
                           ),
@@ -272,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen>
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.3),
+                              color: Colors.blue.withValues(alpha: 0.3),
                               blurRadius: 10,
                               spreadRadius: 1,
                             ),
@@ -304,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -320,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     spreadRadius: 5,
                                   ),
@@ -348,21 +337,6 @@ class _LoginScreenState extends State<LoginScreen>
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'Your Personal Weather Companion',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(1, 1),
-                                    blurRadius: 2,
-                                    color: Colors.black26,
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -375,15 +349,15 @@ class _LoginScreenState extends State<LoginScreen>
                           return Container(
                             padding: const EdgeInsets.all(30),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(25),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -391,84 +365,54 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             child: Column(
                               children: [
-                                // Email input field
-                                Container(
-                                  decoration: BoxDecoration(
+                                // Email input field - NO BOX
+                                TextField(
+                                  controller: _emailController,
+                                  style: const TextStyle(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue.withOpacity(0.3),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
+                                    fontSize: 16,
                                   ),
-                                  child: TextField(
-                                    controller: _emailController,
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 16,
+                                  decoration: InputDecoration(
+                                    labelText: (_isEmailFocused || _emailController.text.isNotEmpty) ? null : 'Email',
+                                    labelStyle: const TextStyle(color: Colors.white70),
+                                    prefixIcon: const Icon(Icons.email, color: Colors.white70),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 15,
                                     ),
-                                    decoration: InputDecoration(
-                                      labelText: (_isEmailFocused || _emailController.text.isNotEmpty) ? null : 'Email',
-                                      labelStyle: TextStyle(color: _isEmailFocused ? Colors.blue : Colors.black54),
-                                      prefixIcon: Icon(Icons.email, color: Colors.blue),
-                                      border: InputBorder.none,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 15,
-                                      ),
-                                    ),
-                                    keyboardType: TextInputType.emailAddress,
-                                    focusNode: _emailFocusNode,
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
                                   ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  focusNode: _emailFocusNode,
+                                  onChanged: (value) {
+                                    setState(() {});
+                                  },
                                 ),
 
-                                const SizedBox(height: 20),
+                                const Divider(color: Colors.white30, height: 30),
 
-                                // Password input field
-                                Container(
-                                  decoration: BoxDecoration(
+                                // Password input field - NO BOX
+                                TextField(
+                                  controller: _passwordController,
+                                  style: const TextStyle(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue.withOpacity(0.3),
-                                        blurRadius: 15,
-                                        offset: const Offset(0, 5),
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
+                                    fontSize: 16,
                                   ),
-                                  child: TextField(
-                                    controller: _passwordController,
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 16,
+                                  decoration: InputDecoration(
+                                    labelText: (_isPasswordFocused || _passwordController.text.isNotEmpty) ? null : 'Password',
+                                    labelStyle: const TextStyle(color: Colors.white70),
+                                    prefixIcon: const Icon(Icons.lock, color: Colors.white70),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 15,
                                     ),
-                                    decoration: InputDecoration(
-                                      labelText: (_isPasswordFocused || _passwordController.text.isNotEmpty) ? null : 'Password',
-                                      labelStyle: TextStyle(color: _isPasswordFocused ? Colors.blue : Colors.black54),
-                                      prefixIcon: Icon(Icons.lock, color: Colors.blue),
-                                      border: InputBorder.none,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 15,
-                                      ),
-                                    ),
-                                    obscureText: true,
-                                    focusNode: _passwordFocusNode,
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
                                   ),
+                                  obscureText: true,
+                                  focusNode: _passwordFocusNode,
+                                  onChanged: (value) {
+                                    setState(() {});
+                                  },
                                 ),
 
                                 const SizedBox(height: 30),
@@ -489,7 +433,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.blue.withOpacity(0.3),
+                                          color: Colors.blue.withValues(alpha: 0.3),
                                           blurRadius: 15,
                                           offset: const Offset(0, 5),
                                         ),
@@ -520,10 +464,10 @@ class _LoginScreenState extends State<LoginScreen>
                                     margin: const EdgeInsets.only(top: 20),
                                     padding: const EdgeInsets.all(15),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
+                                      color: Colors.red.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: Colors.red.withOpacity(0.3),
+                                        color: Colors.red.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Text(

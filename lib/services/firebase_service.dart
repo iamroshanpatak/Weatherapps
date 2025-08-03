@@ -40,7 +40,11 @@ class FirebaseService {
   }
 
   User? getCurrentUser() {
-    return _auth.currentUser;
+    try {
+      return _auth.currentUser;
+    } catch (e) {
+      return null;
+    }
   }
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -53,7 +57,10 @@ class FirebaseService {
           .doc(userId)
           .collection('favorites')
           .doc(cityName)
-          .set({'cityName': cityName, 'addedAt': FieldValue.serverTimestamp()});
+          .set({
+        'cityName': cityName,
+        'timestamp': FieldValue.serverTimestamp(),
+      }).timeout(const Duration(seconds: 10));
     } catch (e) {
       throw Exception('Failed to save favorite city: $e');
     }
@@ -66,18 +73,23 @@ class FirebaseService {
           .doc(userId)
           .collection('favorites')
           .doc(cityName)
-          .delete();
+          .delete()
+          .timeout(const Duration(seconds: 10));
     } catch (e) {
       throw Exception('Failed to remove favorite city: $e');
     }
   }
 
   Stream<QuerySnapshot> getFavoriteCities(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .snapshots();
+    try {
+      return _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .snapshots();
+    } catch (e) {
+      throw Exception('Failed to get favorite cities: $e');
+    }
   }
 
   // Save weather history
@@ -88,12 +100,11 @@ class FirebaseService {
           .doc(userId)
           .collection('weather_history')
           .add({
-            'cityName': weather.cityName,
-            'temperature': weather.temperature,
-            'description': weather.description,
-            'icon': weather.icon,
-            'timestamp': FieldValue.serverTimestamp(),
-          });
+        'cityName': weather.cityName,
+        'temperature': weather.temperature,
+        'description': weather.description,
+        'timestamp': FieldValue.serverTimestamp(),
+      }).timeout(const Duration(seconds: 10));
     } catch (e) {
       throw Exception('Failed to save weather history: $e');
     }
