@@ -371,16 +371,33 @@ class _LoginScreenState extends State<LoginScreen>
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   decoration: InputDecoration(
                                     labelText: (_isEmailFocused || _emailController.text.isNotEmpty) ? null : 'Email',
-                                    labelStyle: const TextStyle(color: Colors.white70),
-                                    prefixIcon: const Icon(Icons.email, color: Colors.white70),
+                                    labelStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintText: 'Enter your email',
+                                    hintStyle: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.8),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.email, 
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 15,
                                     ),
+                                    filled: true,
+                                    fillColor: Colors.white.withValues(alpha: 0.1),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
                                   focusNode: _emailFocusNode,
@@ -397,16 +414,33 @@ class _LoginScreenState extends State<LoginScreen>
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                   decoration: InputDecoration(
                                     labelText: (_isPasswordFocused || _passwordController.text.isNotEmpty) ? null : 'Password',
-                                    labelStyle: const TextStyle(color: Colors.white70),
-                                    prefixIcon: const Icon(Icons.lock, color: Colors.white70),
+                                    labelStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    hintText: 'Enter your password',
+                                    hintStyle: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.8),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    prefixIcon: const Icon(
+                                      Icons.lock, 
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 15,
                                     ),
+                                    filled: true,
+                                    fillColor: Colors.white.withValues(alpha: 0.1),
                                   ),
                                   obscureText: true,
                                   focusNode: _passwordFocusNode,
